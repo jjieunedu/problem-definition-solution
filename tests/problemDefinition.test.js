@@ -37,6 +37,13 @@ describe('정상 케이스', () => {
     });
   });
 
+  it('정상 1-1. 자모 분해형(NFD)으로 입력된 모호 표현도 정상적으로 찾아낸다', () => {
+    const nfdText = ('급식 잔반을 ' + '많이'.normalize('NFD') + ' 줄이고 싶다').normalize('NFD');
+    const feedback = detectAmbiguousExpressions(nfdText);
+
+    expect(feedback.some((f) => f.expression === '많이')).toBe(true);
+  });
+
   it('정상 2. 5개 항목과 태깅된 핵심 요소로 구조화된 결과를 만들고 AI 프롬프트 텍스트로 변환할 수 있다', () => {
     Object.values(VALID_FIELD_VALUES).forEach((value) => {
       expect(validateField(value).valid).toBe(true);

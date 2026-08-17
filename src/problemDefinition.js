@@ -24,7 +24,9 @@ const AMBIGUOUS_EXPRESSIONS = [
 ];
 
 export function detectAmbiguousExpressions(text) {
-  const source = text || '';
+  // 한글은 완성형(NFC)과 자모 분해형(NFD)이 서로 다른 문자열로 취급되므로,
+  // 입력기/OS에 따라 다르게 들어와도 사전과 매칭되도록 정규화한다.
+  const source = (text || '').normalize('NFC');
   const found = [];
 
   for (const { expression, message } of AMBIGUOUS_EXPRESSIONS) {
@@ -39,7 +41,7 @@ export function detectAmbiguousExpressions(text) {
 }
 
 export function isMeaninglessRepetition(text) {
-  const trimmed = (text || '').trim();
+  const trimmed = (text || '').normalize('NFC').trim();
   if (!trimmed) return true;
 
   const withoutSpaces = trimmed.replace(/\s/g, '');
@@ -54,7 +56,7 @@ export function isMeaninglessRepetition(text) {
 }
 
 export function validateField(text) {
-  const trimmed = (text || '').trim();
+  const trimmed = (text || '').normalize('NFC').trim();
 
   if (trimmed.length < MIN_LENGTH) {
     return { valid: false, reason: 'too_short', message: `${MIN_LENGTH}자 이상 작성해주세요.` };

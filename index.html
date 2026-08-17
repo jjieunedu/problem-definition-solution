@@ -7,15 +7,30 @@
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div class="app">
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">모호한 문제 구조화하기<small>Problem Definition Trainer</small></div>
+    <div class="gauge-wrap" title="문제 정의 충족도">
+      <span class="gauge-label">충족도</span>
+      <div class="gauge-track"><div id="gaugeFill" class="gauge-fill" style="width:0%"></div></div>
+      <span id="gaugePct" class="gauge-pct">0%</span>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab-btn active" id="tabStep1" data-step="1">① 문제 분해</button>
+    <button class="tab-btn" id="tabStep2" data-step="2" disabled>② 핵심요소 태깅</button>
+    <button class="tab-btn" id="tabStep3" data-step="3" disabled>③ 결과 내보내기</button>
+  </nav>
+</header>
+
+<main>
 
   <!-- 화면 1: 문제 분해 대시보드 -->
-  <section id="step1" class="step active">
-    <p class="progress">[1/3] 내 문제 정의하기</p>
-    <h1>문제 분해 대시보드</h1>
-    <p class="notice">※ 이름·연락처 등 개인정보를 입력하지 마세요.</p>
+  <section id="step1" class="panel active">
+    <p class="intro">문제 상황을 5가지 항목으로 나누어 20자 이상 구체적으로 적어보세요. 빨간 밑줄 단어는 클릭하면 왜 모호한지 알려줍니다. ※ 이름·연락처 등 개인정보는 입력하지 마세요.</p>
 
-    <div id="fieldsContainer"></div>
+    <div id="fieldsContainer" class="canvas-grid"></div>
 
     <p class="repetition-note">⚠ 의미 없는 반복 입력은 인정되지 않습니다.</p>
 
@@ -28,16 +43,12 @@
   </section>
 
   <!-- 화면 2: 핵심 요소 태깅 -->
-  <section id="step2" class="step">
-    <p class="progress">[2/3] 핵심 요소 태그하기</p>
-    <h1>핵심 요소 태깅</h1>
+  <section id="step2" class="panel">
+    <p class="intro">각 카드에서 핵심 문구를 드래그(길게 눌러 선택)하면 나타나는 메뉴에서 태그를 선택하세요.</p>
 
-    <div id="tagCardsContainer"></div>
+    <p class="selection-readout">선택한 내용: <span id="selectedTextLabel">(텍스트를 드래그해 선택하세요)</span></p>
 
-    <div class="selection-box">
-      선택한 내용: <span id="selectedTextLabel" class="selected-text">(텍스트를 드래그해 선택하세요)</span>
-      <div class="tag-buttons" id="tagButtons"></div>
-    </div>
+    <div id="tagCardsContainer" class="tag-cards"></div>
 
     <div class="scaffold">
       <button id="hintBtn" type="button">💡 힌트</button>
@@ -46,10 +57,7 @@
       <div id="examplePanel" class="scaffold-panel"></div>
     </div>
 
-    <div class="tag-list">
-      태깅된 핵심 요소
-      <ul id="tagListItems"></ul>
-    </div>
+    <div class="tag-summary" id="tagSummary"></div>
 
     <div class="actions">
       <button id="toStep1Btn" type="button">&lt; 이전</button>
@@ -57,16 +65,17 @@
     </div>
   </section>
 
-  <!-- 화면 3: 구조화된 결과 -->
-  <section id="step3" class="step">
-    <p class="progress">[3/3] 문제 정의 결과</p>
-    <h1>구조화된 문제 정의 결과</h1>
+  <!-- 화면 3: 구조화된 결과 / 내보내기 -->
+  <section id="step3" class="panel">
+    <p class="intro">지금까지 입력한 내용을 AI 프롬프트로 정리했습니다. 복사해서 바로 활용하세요.</p>
 
-    <div class="gauge-wrap">
-      <span class="gauge-label">문제 정의 충족도</span>
-      <div class="gauge-track"><div id="gaugeFill" class="gauge-fill" style="width:0%"></div></div>
-      <span id="gaugePct" class="gauge-pct">0%</span>
+    <div class="export-actions">
+      <button id="copyPromptBtn" class="primary" type="button">AI 프롬프트로 복사</button>
+      <button id="restartBtn" type="button">다시 수정하기</button>
+      <span id="copyStatus" class="copy-msg" aria-live="polite"></span>
     </div>
+
+    <textarea id="promptPreview" readonly></textarea>
 
     <div class="result-card">
       <dl id="resultFields"></dl>
@@ -78,15 +87,9 @@
     </div>
 
     <p class="notice">⚠ AI에 입력하기 전에 개인정보가 포함되어 있지 않은지 확인하세요.</p>
-
-    <div class="actions">
-      <button id="copyPromptBtn" class="primary" type="button">AI 프롬프트로 복사</button>
-      <button id="restartBtn" type="button">다시 수정하기</button>
-    </div>
-    <div id="copyStatus" class="copy-status" aria-live="polite"></div>
   </section>
 
-</div>
+</main>
 
 <script type="module" src="src/app.js"></script>
 </body>
