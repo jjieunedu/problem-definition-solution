@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
   MIN_LENGTH,
+  FIELD_DEFS,
   FEEDBACK_ERROR_MESSAGE,
   PERSONAL_INFO_NOTICE,
+  SPECIFICITY_HINT_MESSAGE,
   detectAmbiguousExpressions,
   validateField,
   canProceedFromStep1,
@@ -12,6 +14,8 @@ import {
   structureProblem,
   formatAsPrompt,
   computeFulfillment,
+  hasSpecificityCue,
+  getFieldExample,
 } from '../src/problemDefinition.js';
 
 const VALID_FIELD_VALUES = {
@@ -104,6 +108,41 @@ describe('실패/예외 케이스', () => {
   it('실패 4. 개인정보 입력 가능성에 대비해 확인 안내 문구를 제공한다', () => {
     expect(PERSONAL_INFO_NOTICE).toMatch(/개인정보/);
     expect(PERSONAL_INFO_NOTICE.length).toBeGreaterThan(0);
+  });
+});
+
+describe('부가 기능: 구체화 스캐폴딩', () => {
+  it('숫자·기간·비교 대상 같은 구체적인 근거가 없으면 비차단 넛지 대상으로 판단한다', () => {
+    expect(hasSpecificityCue('문제를 잘 해결하고 싶다')).toBe(false);
+    expect(hasSpecificityCue('급식 잔반이 많이 남는 것이 문제다')).toBe(false);
+
+    expect(hasSpecificityCue('점심시간마다 3학년 학생들의 잔반이 다른 학년보다 두 배 남는다')).toBe(true);
+    expect(hasSpecificityCue('한 달 안에 잔반량을 30퍼센트 줄인다')).toBe(true);
+  });
+
+  it('SPECIFICITY_HINT_MESSAGE는 구체화를 유도하는 안내 문구를 담고 있다', () => {
+    expect(typeof SPECIFICITY_HINT_MESSAGE).toBe('string');
+    expect(SPECIFICITY_HINT_MESSAGE.length).toBeGreaterThan(0);
+  });
+
+  it('각 필드마다 모호한 예시와 구체적인 예시를 제공하며, 구체적인 예시는 실제 검증을 통과한다', () => {
+    FIELD_DEFS.forEach(({ id }) => {
+      const example = getFieldExample(id);
+      expect(example).toHaveProperty('vague');
+      expect(example).toHaveProperty('specific');
+
+      expect(validateField(example.specific).valid).toBe(true);
+      expect(detectAmbiguousExpressions(example.specific)).toHaveLength(0);
+      expect(hasSpecificityCue(example.specific)).toBe(true);
+
+      const vagueIsFlawed =
+        !validateField(example.vague).valid ||
+        detectAmbiguousExpressions(example.vague).length > 0 ||
+        !hasSpecificityCue(example.vague);
+      expect(vagueIsFlawed).toBe(true);
+    });
+
+    expect(getFieldExample('unknown-field-id')).toBeNull();
   });
 });
 

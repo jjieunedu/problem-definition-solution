@@ -297,6 +297,21 @@ main {
   min-height: 1.1em;
 }
 
+.specificity-hint {
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin: 2px 0 0;
+  min-height: 1.1em;
+}
+
+.example-toggle {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  min-height: auto;
+}
+
 .ambiguous-tip {
   position: fixed;
   z-index: 60;

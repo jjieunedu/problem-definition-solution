@@ -12,6 +12,36 @@ export const MEANINGLESS_INPUT_MESSAGE = '문제의 구체적인 내용을 작�
 export const FEEDBACK_ERROR_MESSAGE = '피드백을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.';
 export const PERSONAL_INFO_NOTICE =
   '이름, 연락처, 친구·교사 등 개인을 식별할 수 있는 정보는 입력하지 마세요. AI에 입력하기 전에 개인정보가 포함되어 있지 않은지 확인하세요.';
+export const SPECIFICITY_HINT_MESSAGE =
+  '숫자, 기간, 비교 대상처럼 구체적인 근거를 더해보면 더 명확해져요.';
+
+// 통과/차단 기준이 아니라, 학생이 금지어만 지우고 여전히 두루뭉술한 문장을 쓸 때
+// 부드럽게 구체화를 유도하기 위한 비차단(non-blocking) 신호.
+const SPECIFICITY_PATTERN =
+  /\d|퍼센트|프로|%|보다|비해|대비|이상|이하|평균|오늘|이번\s?주|이번\s?달|한\s?달|개월|주일|동안|까지|매일|매주|매달|학년|학생|선생님|교사|동아리|부원/;
+
+export function hasSpecificityCue(text) {
+  return SPECIFICITY_PATTERN.test((text || '').normalize('NFC'));
+}
+
+const FIELD_EXAMPLES = {
+  currentState: {
+    vague: '급식 잔반이 그냥 많이 남는다',
+    specific: '점심시간마다 3학년 학생들의 잔반이 다른 학년보다 두 배 가까이 남는다',
+  },
+  goalState: {
+    vague: '잔반을 좀 줄이고 싶다',
+    specific: '한 달 안에 3학년 잔반량을 30퍼센트 줄이고, 잔반 무게를 매일 측정해 확인한다',
+  },
+  constraints: {
+    vague: '예산도 없고 시간도 없다',
+    specific: '추가 예산 없이 기존 급식실 운영 방식 안에서 2주 안에 실천할 수 있어야 한다',
+  },
+};
+
+export function getFieldExample(fieldId) {
+  return FIELD_EXAMPLES[fieldId] || null;
+}
 
 const AMBIGUOUS_EXPRESSIONS = [
   { expression: '그냥', message: '무엇을 어떻게 했는지/할 것인지 구체적으로 작성해보세요.' },

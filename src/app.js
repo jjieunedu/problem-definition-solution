@@ -2,6 +2,7 @@ import {
   FIELD_DEFS,
   TAG_TYPES,
   MIN_LENGTH,
+  SPECIFICITY_HINT_MESSAGE,
   validateField,
   detectAmbiguousExpressions,
   canProceedFromStep1,
@@ -11,6 +12,8 @@ import {
   structureProblem,
   formatAsPrompt,
   computeFulfillment,
+  hasSpecificityCue,
+  getFieldExample,
 } from './problemDefinition.js';
 
 const state = {
@@ -85,11 +88,29 @@ function renderFields() {
         <textarea id="input-${id}" rows="4"></textarea>
       </div>
       <div class="field-message" id="message-${id}"></div>
+      <p class="specificity-hint" id="specificity-${id}"></p>
+      <button type="button" class="example-toggle" id="example-toggle-${id}">✏️ 예시 보기</button>
+      <div class="scaffold-panel" id="example-panel-${id}"></div>
     `;
     fieldsContainer.appendChild(cell);
 
     const textarea = cell.querySelector(`#input-${id}`);
     textarea.addEventListener('input', () => onFieldInput(id, textarea.value));
+
+    const example = getFieldExample(id);
+    const exampleToggleBtn = cell.querySelector(`#example-toggle-${id}`);
+    const examplePanel = cell.querySelector(`#example-panel-${id}`);
+    if (example) {
+      examplePanel.innerHTML = `
+        <p><strong>모호한 예:</strong> ${example.vague}</p>
+        <p><strong>구체적인 예:</strong> ${example.specific}</p>
+      `;
+      exampleToggleBtn.addEventListener('click', () => {
+        examplePanel.classList.toggle('visible');
+      });
+    } else {
+      exampleToggleBtn.style.display = 'none';
+    }
   });
 }
 
@@ -104,6 +125,13 @@ function onFieldInput(id, rawValue) {
 
   const result = validateField(value);
   document.getElementById(`message-${id}`).textContent = result.valid ? '' : result.message;
+
+  const ambiguousMatches = detectAmbiguousExpressions(value);
+  const specificityEl = document.getElementById(`specificity-${id}`);
+  specificityEl.textContent =
+    result.valid && ambiguousMatches.length === 0 && !hasSpecificityCue(value)
+      ? `💡 ${SPECIFICITY_HINT_MESSAGE}`
+      : '';
 
   renderBackdrop(id, value);
   toStep2Btn.disabled = !canProceedFromStep1(state.fieldValues);
