@@ -1,0 +1,395 @@
+:root {
+  --bg: #f7f7fb;
+  --card-bg: #ffffff;
+  --border: #e0e0e8;
+  --text: #222222;
+  --muted: #6b6b76;
+  --primary: #4c5fd5;
+  --danger: #d9483c;
+  --success: #2e9e5b;
+  --warn-bg: #fff4e5;
+  --warn-border: #f0b558;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+.progress {
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+h1 {
+  font-size: 1.25rem;
+  margin: 0 0 16px;
+}
+
+.notice {
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.step {
+  display: none;
+}
+
+.step.active {
+  display: block;
+}
+
+.field {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.field-wrap {
+  position: relative;
+  display: grid;
+}
+
+.field-wrap > * {
+  grid-area: 1 / 1;
+}
+
+.field-backdrop {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  color: transparent;
+  pointer-events: none;
+  min-height: 64px;
+  z-index: 2;
+}
+
+.field-backdrop mark {
+  background: transparent;
+  color: transparent;
+  border-bottom: 2px solid var(--danger);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.field-wrap textarea {
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+.ambiguous-tip {
+  position: fixed;
+  z-index: 60;
+  background: var(--text);
+  color: #fff;
+  font-size: 0.78rem;
+  padding: 8px 10px;
+  border-radius: 8px;
+  max-width: 240px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.field-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.field-helper {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-bottom: 8px;
+}
+
+.char-count {
+  font-weight: 400;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.char-count.ok {
+  color: var(--success);
+}
+
+.char-count.warn {
+  color: var(--danger);
+}
+
+textarea {
+  width: 100%;
+  min-height: 64px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.field-message {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--danger);
+  min-height: 1.2em;
+}
+
+.ambiguous-preview {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  padding: 8px 10px;
+  background: #fafafc;
+  border-radius: 6px;
+  display: none;
+}
+
+.ambiguous-preview.visible {
+  display: block;
+}
+
+.ambiguous-preview mark {
+  background: transparent;
+  color: var(--danger);
+  text-decoration: underline wavy var(--danger);
+  font-weight: 700;
+}
+
+.ambiguous-preview .feedback-line {
+  margin-top: 4px;
+  color: var(--danger);
+}
+
+.repetition-note {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 4px 0 20px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+button {
+  font-family: inherit;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 10px 18px;
+  background: var(--card-bg);
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.feedback-status {
+  margin-top: 14px;
+  font-size: 0.9rem;
+}
+
+.feedback-status.error {
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feedback-status .retry-btn {
+  padding: 4px 10px;
+  font-size: 0.85rem;
+}
+
+/* Step 2 */
+
+.tag-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.tag-card h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.tag-card .card-text {
+  user-select: text;
+  cursor: text;
+}
+
+.tag-card mark {
+  padding: 1px 2px;
+  border-radius: 3px;
+}
+
+.tag-현재상태 { background: #ffe3e3; }
+.tag-목표 { background: #e3f1ff; }
+.tag-제약 { background: #fff3d6; }
+.tag-이해관계자 { background: #e6ffe9; }
+.tag-성공기준 { background: #f1e3ff; }
+
+.selection-box {
+  margin: 20px 0 10px;
+  padding: 12px 14px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+}
+
+.selection-box .selected-text {
+  font-weight: 700;
+}
+
+.tag-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tag-buttons button {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.scaffold {
+  margin-top: 16px;
+  font-size: 0.85rem;
+}
+
+.scaffold-panel {
+  display: none;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: #fafafc;
+  border-radius: 8px;
+}
+
+.scaffold-panel.visible {
+  display: block;
+}
+
+.tag-list {
+  margin-top: 16px;
+  font-size: 0.85rem;
+}
+
+.tag-list ul {
+  padding-left: 18px;
+  margin: 6px 0 0;
+}
+
+/* Step 3 */
+
+.result-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.result-card dt {
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.result-card dt:first-child {
+  margin-top: 0;
+}
+
+.result-card dd {
+  margin: 2px 0 0;
+  color: var(--text);
+}
+
+.tag-chip {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  margin: 0 6px 6px 0;
+}
+
+.copy-status {
+  font-size: 0.85rem;
+  color: var(--success);
+  margin-top: 8px;
+  min-height: 1.2em;
+}
+
+/* Fulfillment gauge */
+
+.gauge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.gauge-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.gauge-track {
+  flex: 1;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.gauge-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary);
+  transition: width 0.25s ease;
+}
+
+.gauge-pct {
+  font-size: 0.9rem;
+  font-weight: 700;
+  min-width: 40px;
+  text-align: right;
+}

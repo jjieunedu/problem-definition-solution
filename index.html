@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>모호한 문제 구조화하기</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app">
+
+  <!-- 화면 1: 문제 분해 대시보드 -->
+  <section id="step1" class="step active">
+    <p class="progress">[1/3] 내 문제 정의하기</p>
+    <h1>문제 분해 대시보드</h1>
+    <p class="notice">※ 이름·연락처 등 개인정보를 입력하지 마세요.</p>
+
+    <div id="fieldsContainer"></div>
+
+    <p class="repetition-note">⚠ 의미 없는 반복 입력은 인정되지 않습니다.</p>
+
+    <div class="actions">
+      <button id="feedbackBtn" type="button">피드백 받기</button>
+      <button id="toStep2Btn" class="primary" type="button" disabled>다음 &gt;</button>
+    </div>
+
+    <div id="feedbackStatus" class="feedback-status" aria-live="polite"></div>
+  </section>
+
+  <!-- 화면 2: 핵심 요소 태깅 -->
+  <section id="step2" class="step">
+    <p class="progress">[2/3] 핵심 요소 태그하기</p>
+    <h1>핵심 요소 태깅</h1>
+
+    <div id="tagCardsContainer"></div>
+
+    <div class="selection-box">
+      선택한 내용: <span id="selectedTextLabel" class="selected-text">(텍스트를 드래그해 선택하세요)</span>
+      <div class="tag-buttons" id="tagButtons"></div>
+    </div>
+
+    <div class="scaffold">
+      <button id="hintBtn" type="button">💡 힌트</button>
+      <button id="exampleBtn" type="button">예시 태깅 보기</button>
+      <div id="hintPanel" class="scaffold-panel"></div>
+      <div id="examplePanel" class="scaffold-panel"></div>
+    </div>
+
+    <div class="tag-list">
+      태깅된 핵심 요소
+      <ul id="tagListItems"></ul>
+    </div>
+
+    <div class="actions">
+      <button id="toStep1Btn" type="button">&lt; 이전</button>
+      <button id="toStep3Btn" class="primary" type="button" disabled>다음 &gt;</button>
+    </div>
+  </section>
+
+  <!-- 화면 3: 구조화된 결과 -->
+  <section id="step3" class="step">
+    <p class="progress">[3/3] 문제 정의 결과</p>
+    <h1>구조화된 문제 정의 결과</h1>
+
+    <div class="gauge-wrap">
+      <span class="gauge-label">문제 정의 충족도</span>
+      <div class="gauge-track"><div id="gaugeFill" class="gauge-fill" style="width:0%"></div></div>
+      <span id="gaugePct" class="gauge-pct">0%</span>
+    </div>
+
+    <div class="result-card">
+      <dl id="resultFields"></dl>
+    </div>
+
+    <div class="result-card">
+      <strong>핵심 태그</strong>
+      <div id="resultTags"></div>
+    </div>
+
+    <p class="notice">⚠ AI에 입력하기 전에 개인정보가 포함되어 있지 않은지 확인하세요.</p>
+
+    <div class="actions">
+      <button id="copyPromptBtn" class="primary" type="button">AI 프롬프트로 복사</button>
+      <button id="restartBtn" type="button">다시 수정하기</button>
+    </div>
+    <div id="copyStatus" class="copy-status" aria-live="polite"></div>
+  </section>
+
+</div>
+
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

@@ -1,98 +1,121 @@
 import { describe, it, expect } from 'vitest';
 import {
-  MIN_PROBLEM_LENGTH,
-  validateProblemStatement,
+  MIN_LENGTH,
+  FEEDBACK_ERROR_MESSAGE,
+  PERSONAL_INFO_NOTICE,
   detectAmbiguousExpressions,
-  structureProblem,
+  validateField,
+  canProceedFromStep1,
+  createTag,
   getScaffoldingHints,
+  requestFeedback,
+  structureProblem,
   formatAsPrompt,
+  computeFulfillment,
 } from '../src/problemDefinition.js';
 
-// 정상 케이스 (2)
+const VALID_FIELD_VALUES = {
+  currentState: '학교 급식에서 잔반이 매일 상당량 남아 음식물 쓰레기가 늘어나고 있다',
+  goalState: '한 달 안에 급식 잔반량을 30퍼센트 줄이는 것을 목표로 한다',
+  constraints: '추가 예산 없이 기존 급식 운영 방식 안에서 개선해야 한다',
+  stakeholders: '급식을 먹는 학생과 급식을 준비하는 영양사와 조리사가 관련되어 있다',
+  successCriteria: '잔반 무게를 매일 측정하여 이전 대비 감소했는지로 판단한다',
+};
 
 describe('정상 케이스', () => {
-  it('학생이 해결하고 싶은 문제를 작성하면, 모호한 표현에 대한 피드백을 제공받아야 한다', () => {
+  it('정상 1. 모호 표현이 포함된 문장에서 하이라이트할 표현과 구체적인 피드백을 제공한다', () => {
     const feedback = detectAmbiguousExpressions(
-      '학생들이 좀 더 재미있게 공부할 수 있는 방법을 적당히 찾고 싶다'
+      '그냥 급식을 잘 관리해서 좋게 만들고 잔반을 많이 줄이고 싶다'
     );
+    const expressions = feedback.map((f) => f.expression);
 
-    expect(Array.isArray(feedback)).toBe(true);
-    expect(feedback.length).toBeGreaterThan(0);
-    expect(feedback.some((f) => f.expression.includes('좀 더'))).toBe(true);
-    expect(feedback.some((f) => f.expression.includes('적당히'))).toBe(true);
+    expect(expressions).toEqual(expect.arrayContaining(['그냥', '잘', '좋게', '많이']));
     feedback.forEach((f) => {
       expect(typeof f.message).toBe('string');
       expect(f.message.length).toBeGreaterThan(0);
+      expect(typeof f.index).toBe('number');
     });
   });
 
-  it('학생은 최종적으로 자신이 제시한 문제에 대해 핵심 요소와 함께 구조화된 문제 정의 결과를 제공받아야 한다', () => {
-    const problem = '중학교 3학년 학생들의 수학 시험 불안감을 낮추고 싶다';
-    const coreElements = [
-      { type: '대상', value: '중학교 3학년 학생' },
-      { type: '목표', value: '수학 시험 불안감 감소' },
-      { type: '제약', value: '학교 정규 수업 시간 내' },
-    ];
+  it('정상 2. 5개 항목과 태깅된 핵심 요소로 구조화된 결과를 만들고 AI 프롬프트 텍스트로 변환할 수 있다', () => {
+    Object.values(VALID_FIELD_VALUES).forEach((value) => {
+      expect(validateField(value).valid).toBe(true);
+    });
+    expect(canProceedFromStep1(VALID_FIELD_VALUES)).toBe(true);
 
-    const result = structureProblem(problem, coreElements);
+    const tag = createTag('잔반이 매일 상당량 남아', '현재상태', 'currentState');
+    const structured = structureProblem(VALID_FIELD_VALUES, [tag]);
 
-    expect(result).toHaveProperty('problem', problem);
-    expect(result).toHaveProperty('coreElements');
-    expect(result.coreElements).toHaveLength(3);
-    expect(result.coreElements).toEqual(expect.arrayContaining(coreElements));
-    expect(result).toHaveProperty('summary');
-    expect(typeof result.summary).toBe('string');
+    expect(structured.fields).toHaveLength(5);
+    expect(structured.tags).toEqual([tag]);
+
+    const prompt = formatAsPrompt(structured);
+    expect(typeof prompt).toBe('string');
+    Object.values(VALID_FIELD_VALUES).forEach((value) => {
+      expect(prompt).toContain(value);
+    });
+    expect(prompt).toContain(tag.text);
   });
 });
 
-// 실패/예외 케이스 (3)
-
 describe('실패/예외 케이스', () => {
-  it('학생이 20자 미만으로 문제를 작성하면, 20자 이상 작성이 필요하다고 알려줘야 한다', () => {
-    const tooShort = validateProblemStatement('짧은 문장');
-
+  it('실패 1. 20자 미만이거나 의미 없는 반복 입력이면 통과시키지 않는다', () => {
+    const tooShort = validateField('짧은 문장');
     expect(tooShort.valid).toBe(false);
-    expect(tooShort.message).toMatch(/20자/);
+    expect(tooShort.message).toMatch(new RegExp(`${MIN_LENGTH}자`));
 
-    const longEnough = validateProblemStatement(
-      '중학교 3학년 학생들의 수학 시험 불안감을 낮추고 싶다'
-    );
-    expect(longEnough.valid).toBe(true);
-    expect('중학교 3학년 학생들의 수학 시험 불안감을 낮추고 싶다'.length).toBeGreaterThanOrEqual(
-      MIN_PROBLEM_LENGTH
-    );
+    const repeated = validateField('가가가가가가가가가가가가가가가가가가가가');
+    expect(repeated.valid).toBe(false);
+    expect(repeated.message).toBe('문제의 구체적인 내용을 작성해주세요.');
+
+    const invalidFieldValues = { ...VALID_FIELD_VALUES, currentState: '짧은 문장' };
+    expect(canProceedFromStep1(invalidFieldValues)).toBe(false);
   });
 
-  it('학생이 핵심 요소 추출(태깅)을 어려워할 때, 스캐폴딩(힌트, 예시 미리보기)을 제공받을 수 있어야 한다', () => {
+  it('실패 2. 태깅을 어려워하는 경우 힌트와 예시를 제공하고, 선택한 텍스트와 태그의 연결이 명확히 드러난다', () => {
     const scaffolding = getScaffoldingHints();
-
-    expect(scaffolding).toHaveProperty('hints');
-    expect(scaffolding).toHaveProperty('examples');
     expect(scaffolding.hints.length).toBeGreaterThan(0);
     expect(scaffolding.examples.length).toBeGreaterThan(0);
     scaffolding.examples.forEach((example) => {
+      expect(example).toHaveProperty('text');
       expect(example).toHaveProperty('type');
-      expect(example).toHaveProperty('value');
     });
+
+    const tag = createTag('잔반이 많이 남는다', '현재상태', 'currentState');
+    expect(tag).toEqual({ text: '잔반이 많이 남는다', type: '현재상태', fieldId: 'currentState' });
+
+    expect(() => createTag('잔반이 많이 남는다', '알수없음', 'currentState')).toThrow();
   });
 
-  it('최종 결과물을 학생이 AI에 입력할 프롬프트 형태로 복사·활용할 수 있어야 한다', () => {
-    const structured = {
-      problem: '중학교 3학년 학생들의 수학 시험 불안감을 낮추고 싶다',
-      coreElements: [
-        { type: '대상', value: '중학교 3학년 학생' },
-        { type: '목표', value: '수학 시험 불안감 감소' },
-      ],
-      summary: '중학교 3학년 학생의 수학 시험 불안감 감소를 위한 문제 정의',
-    };
+  it('실패 3. AI 피드백 호출이 실패하면 오류를 알리고 작성 내용은 보존된다', async () => {
+    const fieldValues = { currentState: VALID_FIELD_VALUES.currentState };
 
-    const prompt = formatAsPrompt(structured);
+    await expect(requestFeedback(fieldValues, { simulateError: true })).rejects.toThrow(
+      FEEDBACK_ERROR_MESSAGE
+    );
+    expect(fieldValues.currentState).toBe(VALID_FIELD_VALUES.currentState);
+  });
 
-    expect(typeof prompt).toBe('string');
-    expect(prompt.length).toBeGreaterThan(0);
-    expect(prompt).toContain(structured.problem);
-    structured.coreElements.forEach((element) => {
-      expect(prompt).toContain(element.value);
-    });
+  it('실패 4. 개인정보 입력 가능성에 대비해 확인 안내 문구를 제공한다', () => {
+    expect(PERSONAL_INFO_NOTICE).toMatch(/개인정보/);
+    expect(PERSONAL_INFO_NOTICE.length).toBeGreaterThan(0);
+  });
+});
+
+describe('부가 기능: 문제 정의 충족도', () => {
+  it('아무것도 작성하지 않으면 충족도는 0%이다', () => {
+    const emptyValues = Object.fromEntries(Object.keys(VALID_FIELD_VALUES).map((k) => [k, '']));
+    expect(computeFulfillment(emptyValues, [])).toBe(0);
+  });
+
+  it('5개 항목을 모두 유효하게 작성하면 필드 점수만큼 충족도가 오르고, 5개 태그 유형을 모두 채우면 100%가 된다', () => {
+    const partial = computeFulfillment(VALID_FIELD_VALUES, []);
+    expect(partial).toBeGreaterThan(0);
+    expect(partial).toBeLessThan(100);
+
+    const allTags = ['현재상태', '목표', '제약', '이해관계자', '성공기준'].map((type) =>
+      createTag('예시 텍스트', type, 'currentState')
+    );
+    expect(computeFulfillment(VALID_FIELD_VALUES, allTags)).toBe(100);
   });
 });

@@ -6,9 +6,11 @@
   "description": "모호한 문제 구조화하기 - 학생이 작성한 문제를 명료화하고 핵심 요소로 구조화하는 HTML 기반 학습 도구",
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
+    "@vitest/ui": "^2.1.9",
     "vitest": "^2.1.9"
   }
 }
