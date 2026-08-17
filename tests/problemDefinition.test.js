@@ -16,10 +16,8 @@ import {
 
 const VALID_FIELD_VALUES = {
   currentState: '학교 급식에서 잔반이 매일 상당량 남아 음식물 쓰레기가 늘어나고 있다',
-  goalState: '한 달 안에 급식 잔반량을 30퍼센트 줄이는 것을 목표로 한다',
+  goalState: '한 달 안에 급식 잔반량을 30퍼센트 줄이고 잔반 무게를 측정해 확인한다',
   constraints: '추가 예산 없이 기존 급식 운영 방식 안에서 개선해야 한다',
-  stakeholders: '급식을 먹는 학생과 급식을 준비하는 영양사와 조리사가 관련되어 있다',
-  successCriteria: '잔반 무게를 매일 측정하여 이전 대비 감소했는지로 판단한다',
 };
 
 describe('정상 케이스', () => {
@@ -44,7 +42,7 @@ describe('정상 케이스', () => {
     expect(feedback.some((f) => f.expression === '많이')).toBe(true);
   });
 
-  it('정상 2. 5개 항목과 태깅된 핵심 요소로 구조화된 결과를 만들고 AI 프롬프트 텍스트로 변환할 수 있다', () => {
+  it('정상 2. 3개 항목과 태깅된 핵심 요소로 구조화된 결과를 만들고 AI 프롬프트 텍스트로 변환할 수 있다', () => {
     Object.values(VALID_FIELD_VALUES).forEach((value) => {
       expect(validateField(value).valid).toBe(true);
     });
@@ -53,7 +51,7 @@ describe('정상 케이스', () => {
     const tag = createTag('잔반이 매일 상당량 남아', '현재상태', 'currentState');
     const structured = structureProblem(VALID_FIELD_VALUES, [tag]);
 
-    expect(structured.fields).toHaveLength(5);
+    expect(structured.fields).toHaveLength(3);
     expect(structured.tags).toEqual([tag]);
 
     const prompt = formatAsPrompt(structured);
@@ -115,7 +113,7 @@ describe('부가 기능: 문제 정의 충족도', () => {
     expect(computeFulfillment(emptyValues, [])).toBe(0);
   });
 
-  it('5개 항목을 모두 유효하게 작성하면 필드 점수만큼 충족도가 오르고, 5개 태그 유형을 모두 채우면 100%가 된다', () => {
+  it('3개 항목을 모두 유효하게 작성하면 필드 점수만큼 충족도가 오르고, 5개 태그 유형을 모두 채우면 100%가 된다', () => {
     const partial = computeFulfillment(VALID_FIELD_VALUES, []);
     expect(partial).toBeGreaterThan(0);
     expect(partial).toBeLessThan(100);

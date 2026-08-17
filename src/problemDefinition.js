@@ -1,11 +1,9 @@
 export const MIN_LENGTH = 20;
 
 export const FIELD_DEFS = [
-  { id: 'currentState', label: '현재 상태', helper: '지금 무엇이 문제인지, 왜 불편/부족한지' },
-  { id: 'goalState', label: '목표 상태', helper: '해결 후 어떤 상태가 되길 원하는지' },
+  { id: 'currentState', label: '현재 상태', helper: '지금 무엇이 문제인지, 왜 불편/부족한지 (누가 관련되어 있는지도 함께 적어보세요)' },
+  { id: 'goalState', label: '목표 상태', helper: '해결 후 어떤 상태가 되길 원하는지, 무엇을 보면 "해결됐다"고 판단할 수 있는지' },
   { id: 'constraints', label: '필요한 조건(제약사항)', helper: '시간, 자원, 규칙 등 지켜야 할 조건' },
-  { id: 'stakeholders', label: '이해관계자', helper: '이 문제와 관련된 사람/그룹' },
-  { id: 'successCriteria', label: '성공 기준', helper: '무엇을 보면 "해결됐다"고 판단할 수 있는지' },
 ];
 
 export const TAG_TYPES = ['현재상태', '목표', '제약', '이해관계자', '성공기준'];
